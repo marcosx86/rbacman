@@ -4,6 +4,8 @@ import io.fabric8.kubernetes.api.model.APIResourceList;
 import io.fabric8.kubernetes.api.model.GroupVersionForDiscovery;
 import io.fabric8.kubernetes.client.*;
 import lombok.extern.log4j.Log4j2;
+import net.m21xx.labs.kubernetes.model.ApiResource;
+import net.m21xx.labs.kubernetes.model.ApiResourceGroup;
 import net.m21xx.labs.kubernetes.service.KubernetesService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -43,9 +45,11 @@ public class KubernetesServiceImpl implements KubernetesService {
     }
 
     @Override
-    public List<String> getAllResources() {
+    public List<ApiResourceGroup> getAllResources() {
 
-        List<String> groups = client.getApiGroups().getGroups().stream()
+        List<ApiResourceGroup> groups = new ArrayList<>();
+
+        List<String> groupNames = client.getApiGroups().getGroups().stream()
                 .map(r -> r.getVersions().stream()
                         .map(GroupVersionForDiscovery::getGroupVersion)
                         .collect(Collectors.toList()))
@@ -53,31 +57,32 @@ public class KubernetesServiceImpl implements KubernetesService {
                     lst.addAll(itm);
                     return lst;
                 });
-        groups.add(0, "v1");
-        groups.forEach(System.out::println);
+        groupNames.add(0, "v1");
+//        groupNames.forEach(System.out::println);
 
-        List<String> lst = new ArrayList<>();
-        for (String group : groups) {
-            lst.add(String.format("\n#### ALL RESOURCES FOR %s ####", group));
-            lst.addAll(getApiResourcesFor(group));
+        List<ApiResourceGroup> lst = new ArrayList<>();
+        for (String group : groupNames) {
+//            lst.add(String.format("\n#### ALL RESOURCES FOR %s ####", group));
+            ApiResourceGroup theGroup = ApiResourceGroup.builder()
+                    .groupVersion(group)
+                    .apiResources(getApiResourcesFor(group))
+                    .build();
+            lst.add(theGroup);
         }
 
         return lst;
     }
 
-    private List<String> getApiResourcesFor(String groupVersion) {
-        List<String> lst;
+    private List<ApiResource> getApiResourcesFor(String groupVersion) {
+
         APIResourceList apiResourceList = client.getApiResources(groupVersion);
-        lst = apiResourceList.getResources().stream()
-                .map(res -> {
-                    String verbs = res.getVerbs().stream()
-                            .reduce("", (a, b) -> "".equals(a) ? b : String.format("%s, %s", a, b));
-                    String categories = Optional.ofNullable(res.getCategories())
-                            .orElse(List.of(""))
-                            .stream()
-                            .reduce("", (a, b) -> "".equals(a) ? b : String.format("%s, %s", a, b));
-                    return String.format("(core) %s -> %s: %s (%s)", res.getVersion(), res.getName(), verbs, categories);
-                }).collect(Collectors.toList());
+        List<ApiResource> lst = new ArrayList<>();
+        apiResourceList.getResources().stream()
+                .map(res -> ApiResource.builder()
+                            .resource(res.getName())
+                            .verbs(res.getVerbs())
+                            .build())
+                .forEach(lst::add);
         return lst;
     }
 
