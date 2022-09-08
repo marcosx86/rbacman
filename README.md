@@ -5,6 +5,7 @@ The intetion is to provide an easier way to manage RBAC roles and assignments. A
 
 TODO
 
+* Solution design for presenting here
 * OpenAPI spec + codegen
 * ~~Listing all resources~~
 * CRUD ServiceAccounts
