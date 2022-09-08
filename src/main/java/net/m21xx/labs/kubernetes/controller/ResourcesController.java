@@ -19,7 +19,7 @@ public class ResourcesController {
     @Autowired
     private KubernetesService kubernetesService;
 
-    @RequestMapping(method = RequestMethod.GET, path = "/")
+    @RequestMapping(method = RequestMethod.GET, path = "")
     public ResponseEntity<List<ApiResourceGroup>> getAllResources() {
 
         return ResponseEntity.ok(kubernetesService.getAllResources());

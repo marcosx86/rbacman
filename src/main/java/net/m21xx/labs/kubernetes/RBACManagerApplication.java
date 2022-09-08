@@ -1,13 +1,9 @@
 package net.m21xx.labs.kubernetes;
 
-import net.m21xx.labs.kubernetes.service.KubernetesService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
-
-import java.util.Optional;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"net.m21xx"})
@@ -17,15 +13,15 @@ public class RBACManagerApplication implements CommandLineRunner {
         SpringApplication.run(RBACManagerApplication.class, args);
     }
 
-    @Autowired
-    private KubernetesService kubernetesService;
+//    @Autowired
+//    private KubernetesService kubernetesService;
 
     @Override
     public void run(String... args) throws Exception {
 
-       Optional.ofNullable(kubernetesService.getAllResources())
-                .orElseThrow()
-                .forEach(System.out::println);
+//       Optional.ofNullable(kubernetesService.getAllResources())
+//                .orElseThrow()
+//                .forEach(System.out::println);
     }
 
 }
